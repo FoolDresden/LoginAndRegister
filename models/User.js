@@ -8,6 +8,7 @@ var UserSchema = new Schema({
     required: true,
     minlength: 3,
     trim: true,
+    unique: true,
   },
   pwd: {
     type: 'String',

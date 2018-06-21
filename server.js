@@ -1,7 +1,8 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var multipart = require('connect-multiparty');
-var express-session = require('express-session');
+var session = require('express-session');
+var hbs = require('hbs');
 
 var {mongoose} = require('./db/mongoose.js');
 var {User} = require('./models/User.js');
@@ -11,11 +12,13 @@ var app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
+app.use(session({secret: 'lala'}))
 // var multipartMiddleware = multipart();
 
 app.get('/', (req, res)=>{
-  res.send("Hi");
+  // res.send("Hi");
+  // res.sendFile('./views/home.html');
+  res.render('home.hbs');
 });
 
 app.post('/register', function(req, res){
@@ -42,6 +45,30 @@ app.post('/register', function(req, res){
     }
   });
 
+});
+
+app.post('/login', (req, res)=>{
+  var user = req.body.user;
+  var pwd = req.body.pwd;
+  req.session.user = user;
+  req.session.pwd = pwd;
+  User.findOne({user, pwd}).then((doc)=>{
+    if(doc){
+      console.log("Success login");
+      // console.log(user);
+      // console.log(pwd);
+      // res.send(doc);
+      res.render('logged.hbs');
+    }else{
+      res.send('Error');
+    }
+  }, (err)=>{
+    res.send('Invalid');
+  });
+});
+
+app.get('/register', (req, res)=>{
+  res.render('register.hbs');
 });
 
 app.post('/courses', (req, res)=>{
