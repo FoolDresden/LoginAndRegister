@@ -18,9 +18,10 @@ app.use(session({secret: 'lala'}))
 // var multipartMiddleware = multipart();
 
 app.get('/', (req, res)=>{
-  // res.send("Hi");
-  // res.sendFile('./views/home.html');
-  res.sendFile(path.join(__dirname, '/views/home.html'));
+  if(!req.session.user){
+    req.session.user = 'Guest';
+  }
+  res.render(path.join(__dirname, '/views/home.hbs'), {user: req.session.user});
 });
 
 app.post('/register', function(req, res){
@@ -44,6 +45,8 @@ app.post('/register', function(req, res){
       // console.log(err);
       return res.status(400).send(err);
     }else{
+      req.session.user = req.body.user;
+      req.session.pwd = req.body.pwd;
       res.send(doc);
     }
   });
@@ -54,23 +57,37 @@ app.get('/register', (req, res)=>{
   res.sendFile(path.join(__dirname, '/views/register.html'));
 });
 
+app.get('/logged', (req, res)=>{
+  console.log("Redirected to logged");
+  console.log("req.session.user: ",req.session.user);
+  res.render(path.join(__dirname, '/views/logged.hbs'), {username: req.session.user});
+  // res.sendFile(path.join(__dirname, '/views/home.html'));
+  console.log("Hi. After render");
+});
+
 app.post('/login', (req, res)=>{
   var user = req.body.user;
   var pwd = req.body.pwd;
-  req.session.user = user;
-  req.session.pwd = pwd;
   User.findOne({user, pwd}).then((doc)=>{
     if(doc){
       console.log("Success login");
+      req.session.user = user;
+      req.session.pwd = pwd;
+      res.set('text/plain').send("Success Login");
       // console.log(user);
       // console.log(pwd);
       // res.send(doc);
+      // res.redirect('/logged');
     }else{
-      res.send('Error');
+      console.log('Error!! User not found');
     }
   }, (err)=>{
     res.send('Invalid');
   });
+});
+
+app.get('/login', (req, res)=>{
+  res.sendFile(path.join(__dirname, '/views/login.html'))
 });
 
 app.post('/courses', (req, res)=>{
