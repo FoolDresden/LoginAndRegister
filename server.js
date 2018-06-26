@@ -3,6 +3,7 @@ var bodyParser = require('body-parser');
 var multipart = require('connect-multiparty');
 var session = require('express-session');
 var hbs = require('hbs');
+var path = require('path');
 
 var {mongoose} = require('./db/mongoose.js');
 var {User} = require('./models/User.js');
@@ -10,6 +11,7 @@ var {Course} = require('./models/Course.js');
 
 var app = express();
 
+// app.use(express.static(path.join(__dirname, '/views/')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({secret: 'lala'}))
@@ -18,7 +20,7 @@ app.use(session({secret: 'lala'}))
 app.get('/', (req, res)=>{
   // res.send("Hi");
   // res.sendFile('./views/home.html');
-  res.render('home.hbs');
+  res.sendFile(path.join(__dirname, '/views/home.html'));
 });
 
 app.post('/register', function(req, res){
@@ -39,12 +41,17 @@ app.post('/register', function(req, res){
 
   User.create(body, function(err, doc){
     if(err){
+      // console.log(err);
       return res.status(400).send(err);
     }else{
       res.send(doc);
     }
   });
 
+});
+
+app.get('/register', (req, res)=>{
+  res.sendFile(path.join(__dirname, '/views/register.html'));
 });
 
 app.post('/login', (req, res)=>{
@@ -58,17 +65,12 @@ app.post('/login', (req, res)=>{
       // console.log(user);
       // console.log(pwd);
       // res.send(doc);
-      res.render('logged.hbs');
     }else{
       res.send('Error');
     }
   }, (err)=>{
     res.send('Invalid');
   });
-});
-
-app.get('/register', (req, res)=>{
-  res.render('register.hbs');
 });
 
 app.post('/courses', (req, res)=>{
