@@ -14,6 +14,14 @@ var UserSchema = new Schema({
     type: 'String',
     required: true,
     minlength: 8,
+  },
+  privilege: {
+    type: String,
+    default: 'user',
+  },
+  courses: {
+    type: Array,
+    default: [],
   }
 });
 

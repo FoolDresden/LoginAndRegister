@@ -25,21 +25,11 @@ app.get('/', (req, res)=>{
 });
 
 app.post('/register', function(req, res){
-  // var username = req.username;
-  // var password = req.password;
   console.log(req.body);
   var body = {
     user: req.body.user,
     pwd: req.body.pwd,
   };
-  // var user = User(body);
-
-  // user.save().then((doc)=>{
-  //   console.log(doc);
-  // }, (err)=>{
-  //   console.log(err);
-  // });
-
   User.create(body, function(err, doc){
     if(err){
       // console.log(err);
@@ -50,7 +40,6 @@ app.post('/register', function(req, res){
       res.send(doc);
     }
   });
-
 });
 
 app.get('/register', (req, res)=>{
@@ -109,11 +98,37 @@ app.post('/courses', (req, res)=>{
 });
 
 app.get('/courses', (req, res)=>{
-  Course.find().then((docs)=>{
-    res.send(docs);
+  if(!req.session.user){
+    res.sendFile(path.join(__dirname, '/views/error.html'));
+    return;
+  }
+  User.findOne({user: req.session.user}).then((doc)=>{
+    console.log("User found");
+    // res.send(doc);
+    res.render(path.join(__dirname, '/views/registeredCourses.hbs'), {
+      courses: doc.courses,
+      username: req.session.user,
+    });
   }, (err)=>{
     res.status(400).send(err);
   });
+});
+
+app.get('/courses/:id', (req, res)=>{
+  Course.findOne({regid: req.params.id}).then((doc)=>{
+    res.render(path.join(__dirname, '/views/course.hbs'), {
+      name: doc.name,
+      regid: doc.regid,
+      text: doc.text,
+      credits: doc.credits,
+    });
+  }, (err)=>{
+    res.send(err);
+  });
+});
+
+app.get('/erp', (req, res)=>{
+  
 });
 
 app.listen(3000, ()=>{

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <h1>{{username}} page</h1>
+</head>
+<body>
+  <h3>Welcome {{username}}!!</h3>
+  <p>This is your <b>Courses</b> page</p>
+  <p>Your registered courses are:</p>
+  <ul>
+    {{#each courses}}
+    <li><a href="/courses/{{this}}">{{this}}</li>
+    {{/each}}
+  </ul>
+</body>
+</html>
