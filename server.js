@@ -154,6 +154,23 @@ app.get('/addcourse', (req, res)=>{
   res.sendFile(path.join(__dirname, '/views/addcourse.html'));
 });
 
+app.post('/coursecart', (req, res)=>{
+  //urlencoded form data
+  regid = req.body.regid;
+  User.findOne({user: req.session.User.user}).then((doc)=>{
+    if(doc){
+      console.log(doc);
+      doc.courses.push(regid);
+      doc.save();
+      res.send(doc.courses);
+    }else{
+      res.send("NOT FOUND");
+    }
+  }, (err)=>{
+    res.status(400).send(err);
+  })
+});
+
 app.listen(3000, ()=>{
   console.log("Check 3000");
 });
