@@ -144,6 +144,15 @@ app.get('/courses/:id', (req, res)=>{
   });
 });
 
+app.get('/addcourse', (req, res)=>{
+  if(!req.session.User || req.session.User.privilege!=='admin'){
+      res.render(path.join(__dirname, '/views/error.hbs'), {
+        error: "Need to admin access to add courses",
+      });
+      return;
+    }
+  res.sendFile(path.join(__dirname, '/views/addcourse.html'));
+});
 
 app.listen(3000, ()=>{
   console.log("Check 3000");
