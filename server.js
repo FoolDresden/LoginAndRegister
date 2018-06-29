@@ -4,6 +4,8 @@ var multipart = require('connect-multiparty');
 var session = require('express-session');
 var hbs = require('hbs');
 var path = require('path');
+var pug = require('pug');
+var {XMLHttpRequest} = require('xmlhttprequest');
 
 var {mongoose} = require('./db/mongoose.js');
 var {User} = require('./models/User.js');
@@ -12,6 +14,8 @@ var {Course} = require('./models/Course.js');
 var app = express();
 
 // app.use(express.static(path.join(__dirname, '/views/')));
+app.set('view engine', 'pug');
+app.set('view engine', 'hbs');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({secret: 'lala'}))
@@ -155,10 +159,23 @@ app.get('/addcourse', (req, res)=>{
 });
 
 app.post('/coursecart', (req, res)=>{
+  if(!req.session.User || req.session.User.privilege==='admin'){
+    res.render(path.join(__dirname, '/views/error.hbs'), {
+      error: "Need to user login to add courses",
+    });
+    return;
+  }
   //urlencoded form data
   regid = req.body.regid;
   User.findOne({user: req.session.User.user}).then((doc)=>{
     if(doc){
+      for(var i=0;i<doc.courses.length;i++){
+        console.log("doc.courses.regid: ",doc.courses[i], regid);
+        if(regid===doc.courses[i]){
+          console.log("Didn't add");
+          return;
+        }
+      }
       console.log(doc);
       doc.courses.push(regid);
       doc.save();
@@ -171,6 +188,42 @@ app.post('/coursecart', (req, res)=>{
   })
 });
 
+app.get('/coursecart', (req, res)=>{
+  if(!req.session.User || req.session.User.privilege==='admin'){
+    res.render(path.join(__dirname, '/views/error.hbs'), {
+      error: "Need to user login to add courses",
+    });
+    return;
+  }
+  // res.send("Hi");
+  var array=[];
+  Course.find().then((doc)=>{
+    // console.log("From backend:", doc);
+    for(var i=0;i<doc.length;i++){
+      array.push(doc[i].regid);
+    }
+    // console.log(array);
+    var jsonData=`{"courses": "${array}"}`
+    res.render(path.join(__dirname, '/views/coursecart.hbs'), {
+      courses: array,
+      user: req.session.User.user,
+      func: function(){console.log(1)}
+    });
+  }, (err)=>{
+    console.log("Error happened!!");
+  });
+});
+
 app.listen(3000, ()=>{
   console.log("Check 3000");
 });
+
+// var http = new XMLHttpRequest();
+// http.open("POST", "/coursecart", true);
+// http.setRequestHeader("Content-type", "application/json");
+// http.setRequestHeader("charset", "utf-8");
+// http.onload = function(){
+//   document.getElementById("#error").innerHTML="Success!!";
+// }
+// http.send({regid: id});
+// console.log(http);

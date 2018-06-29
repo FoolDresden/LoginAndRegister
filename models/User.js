@@ -20,7 +20,7 @@ var UserSchema = new Schema({
     default: 'user',
   },
   courses: {
-    type: Array,
+    type: [{type: String, unique: true}],
     default: [],
   }
 });

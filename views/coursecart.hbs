@@ -1,0 +1,40 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <h1>Course register page</h1>
+</head>
+<body>
+  <h3>Welcome {{user}}!!</h3>
+  <!-- <form id = "register-form"> -->
+    <ul>
+    {{#each courses}}
+    <li>{{this}}</li>
+    <button id="{{this}}" onclick = register(id)>Register</button>
+    <br>
+    {{/each}}
+  <!-- </form> -->
+  <br>
+  <b id = "error"></b>
+  <b><a href="/" id="link"></a></b>
+  <!-- <b>babel.min.js react.js react-dom.min.js</b> -->
+  <script>
+    var register=function(id){
+      console.log(id);
+      console.log("Hi");
+      var http = new XMLHttpRequest();
+      http.open("POST", "/coursecart", true);
+      http.setRequestHeader("Content-type", "application/json");
+      http.setRequestHeader("charset", "utf-8");
+      http.onload = function(){
+        document.getElementById("error").innerHTML="Success!!";
+        document.getElementById("link").innerHTML = "Home";
+        console.log("Success!!")
+      }
+      http.send(`{"regid": "${id}"}`);
+      console.log(http);
+    }
+  </script>
+</body>
+</html>
