@@ -6,6 +6,7 @@ var CourseSchema = mongoose.Schema({
     minlength: 3,
     trim: true,
     type: String,
+    unique: true,
   },
   credits: {
     required: true,
