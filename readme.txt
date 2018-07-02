@@ -16,4 +16,4 @@ localhost:3000/courses
 localhost:3000/coursecart
 localhost:3000/addcourse
 There are no error messages for wrong input. To be added.
-
+For now Ctrl+C to end admin.js. Will fix it soon.
