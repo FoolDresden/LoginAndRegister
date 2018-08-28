@@ -7,7 +7,7 @@
 </head>
 <body>
   <h3>Welcome User!!</h3>
-  <form id = "register-form">
+  <form id = "register-form" action="/login" method="post">
     <input name="username" type = "text" placeholder="Username"></input>
     <br>
     <input name="password" type = "password" placeholder="password"></input>
@@ -18,45 +18,5 @@
   <b id = "error"></b>
   <b><a href="/" id="link"></a></b>
   <!-- <b>babel.min.js react.js react-dom.min.js</b> -->
-  <script src = "https://code.jquery.com/jquery-3.3.1.min.js"></script>
-  <script>
-  var http = new XMLHttpRequest();
-  jQuery("#register-form").on("submit", function(e){
-    e.preventDefault();
-    console.log("Submitted");
-    var user = jQuery("[name=username]").val();
-    var pwd = jQuery("[name=password]").val();
-    console.log(`${user} and ${pwd}`);
-    var body = {
-      user,
-      pwd,
-    };
-    var body2 = `{"user": "${user}", "pwd": "${pwd}"}`;
-    // console.log(body2);
-    http.open("POST", "/login", true);
-    http.setRequestHeader("Content-type", "application/json");
-    http.setRequestHeader("charset", "utf-8");
-    // console.log(JSON.stringify(body));
-    // http.send(jQuery.parseJSON(JSON.stringify(body)));
-    // console.log(JSON.parse(body2));
-    var status = null;
-    http.onload = function(){
-      status = http.readyState;
-      console.log("Status: ",status);
-      document.getElementById("error").innerHTML = "Success!!!";
-      document.getElementById("link").innerHTML = "Home";
-    };
-    http.send(body2);
-    console.log(http);
-    // console.log("http.responseText: ", http.readyState);
-    // console.log(http.response);
-  //   if(http.responseText.trim()===""){
-  //     console.log("FrontSuccess");
-  //     http.open("GET", "/logged", true);
-  //     http.send();
-  //     console.log(http);
-  //   }
-  });
-  </script>
 </body>
 </html>

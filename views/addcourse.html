@@ -7,49 +7,19 @@
 </head>
 <body>
   <h3>Welcome ADMIN!!</h3>
-  <form id = "course-form">
-    <input id="name" type = "text" placeholder="Name"></input>
+  <form id = "course-form" action="/courses" method="post">
+    <input id="name" type = "text" placeholder="Name" name="name"></input>
     <br>
-    <input id="credits" type = "number" placeholder="credits"></input>
+    <input id="credits" type = "number" placeholder="credits" name="credits"></input>
     <br>
-    <input id="regid" type = "text" placeholder="RegID"></input>
+    <input id="regid" type = "text" placeholder="RegID" name="regid"></input>
     <br>
-    <input id="text" type = "text" placeholder="desc" style="height:200px"></input>
+    <input id="text" type = "text" placeholder="desc" style="height:200px" name="text"></input>
     <br>
     <button id="submit">Submit</button>
   </form>
   <br>
   <b id = "error"></b>
   <b><a href="/" id="homeLink"></a> <a href="/addcourse" id="addcourse"></a></b>
-  <!-- <b>babel.min.js react.js react-dom.min.js</b> -->
-  <script src = "https://code.jquery.com/jquery-3.3.1.min.js"></script>
-  <script>
-      var http = new XMLHttpRequest();
-      jQuery("#course-form").on("submit", function(e){
-        e.preventDefault();
-        var name = jQuery("#name").val();
-        var credits = jQuery("#credits").val();
-        var regid = jQuery("#regid").val();
-        var text = jQuery("#text").val();
-        // var body = {
-        //   name,
-        //   credits,
-        //   regid,
-        //   text,
-        // };
-        var body = `{"name": "${name}", "credits": "${credits}", "regid": "${regid}", "text": "${text}"}`;
-        http.open("POST", "/courses", true);
-        http.setRequestHeader("Content-type", "application/json");
-        http.setRequestHeader("charset", "utf-8");
-        http.send(body);
-        console.log("Sent");
-        http.onload = function(){
-          console.log("Inside onload");
-          document.getElementById("error").innerHTML = "Success!!!";
-          document.getElementById("homeLink").innerHTML = "Home";
-          document.getElementById("addcourse").innerHTML = "Add another";
-        };
-      });
-  </script>
 </body>
 </html>

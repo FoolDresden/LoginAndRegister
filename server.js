@@ -36,18 +36,22 @@ app.get('/', (req, res)=>{
 app.post('/register', function(req, res){
   console.log(req.body);
   var body = {
-    user: req.body.user,
-    pwd: req.body.pwd,
+    user: req.body.username,
+    pwd: req.body.password,
   };
   User.create(body, function(err, doc){
     if(err){
       // console.log(err);
-      return res.status(400).send(err);
+      res.render(path.join(__dirname, '/views/error.hbs'), {
+        error: 'The username already exists. Pease pick a new one',
+      });
+      // return res.status(400).send(err);
     }else{
       // req.session.user = req.body.user;
       // req.session.pwd = req.body.pwd;
       req.session.User = doc;
-      res.send(doc);
+      // res.send(doc);
+      res.redirect('/');
     }
   });
 });
@@ -65,21 +69,25 @@ app.get('/profile', (req, res)=>{
 });
 
 app.post('/login', (req, res)=>{
-  var user = req.body.user;
-  var pwd = req.body.pwd;
+  var user = req.body.username;
+  var pwd = req.body.password;
   User.findOne({user, pwd}).then((doc)=>{
     if(doc){
       console.log("Success login");
       req.session.User = doc;
       // req.session.doc = doc;
       // console.log(req.session.doc);
-      res.set('text/plain').send("Success Login");
+      // res.set('text/plain').send("Success Login");
+      res.redirect('/');
       // console.log(user);
       // console.log(pwd);
       // res.send(doc);
       // res.redirect('/logged');
     }else{
       console.log('Error!! User not found');
+      res.render(path.join(__dirname, '/views/error.hbs'), {
+        error: 'Please enter correct username and/or password'
+      });
     }
   }, (err)=>{
     res.send('Invalid');
@@ -189,7 +197,7 @@ app.post('/coursecart', (req, res)=>{
 });
 
 app.get('/coursecart', (req, res)=>{
-  if(!req.session.User || req.session.User.privilege==='admin'){
+  if(!req.session.User || req.session.User.privilege==='admin' || req.session.User.privilege==='guest'){
     res.render(path.join(__dirname, '/views/error.hbs'), {
       error: "Need to user login to add courses",
     });
@@ -212,6 +220,43 @@ app.get('/coursecart', (req, res)=>{
   }, (err)=>{
     console.log("Error happened!!");
   });
+});
+
+app.get('/admin', (req, res)=>{
+  if(req.session.User.privilege==='admin'){
+    var user =[];
+    var course=[];
+    User.find().then((doc)=>{
+      // console.log(doc);
+      user = doc;
+      // console.log(user);
+      Course.find().then((doc2)=>{
+        course = doc2;
+        res.render(path.join(__dirname, '/views/admin.hbs'), {
+          users: user,
+          courses: course,
+        });
+      });
+      // console.log(course);
+    });
+    // console.log("Second one\n");
+    // console.log(user);
+  }
+  else {
+    res.render(path.join(__dirname, '/views/error.hbs'), {
+      error: 'Need admin access to view page'
+    })
+  }
+});
+
+app.get('/logout', (req, res)=>{
+  req.session.User = {
+    privilege: 'guest',
+    courses: [],
+    user: 'Guest',
+    pwd: 'password',
+  };
+  res.redirect('/');
 });
 
 app.listen(3000, ()=>{
