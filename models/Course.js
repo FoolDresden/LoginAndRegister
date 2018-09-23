@@ -13,6 +13,7 @@ var CourseSchema = mongoose.Schema({
     type: Number,
   },
   regid: {
+    unique: true,
     required: true,
     type: String,
     trim: true,

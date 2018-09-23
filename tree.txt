@@ -1,0 +1,8 @@
+/login: user login, shows login.html
+/register: register new user, shows register.html
+/courses: shows user's courses, shows regsiteredCourses.hbs
+          /courses/:id shows the course detaails of the courses needed
+/addcourse: allows admin to make new courses
+/coursecart: POST allows user to register to courses
+             GET shows menu to register to course
+/admin: admin page

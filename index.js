@@ -5,7 +5,8 @@ var session = require('express-session');
 var hbs = require('hbs');
 var path = require('path');
 var pug = require('pug');
-var {XMLHttpRequest} = require('xmlhttprequest');
+var bcrypt = require('bcrypt');
+// var {XMLHttpRequest} = require('xmlhttprequest');
 
 var {mongoose} = require('./db/mongoose.js');
 var {User} = require('./models/User.js');
@@ -34,10 +35,20 @@ app.get('/', (req, res)=>{
 });
 
 app.post('/register', function(req, res){
-  console.log(req.body);
+  // console.log(req.body);
+  var privilege;
+  if(req.session.User.privilege==='admin')
+  {
+    privilege = 'admin';
+  }else{
+    privilege = 'user';
+  }
+  var salt = bcrypt.genSaltSync(2);
+  var hash = bcrypt.hashSync(req.body.password, salt);
   var body = {
     user: req.body.username,
-    pwd: req.body.password,
+    pwd: hash,
+    privilege,
   };
   User.create(body, function(err, doc){
     if(err){
@@ -51,7 +62,11 @@ app.post('/register', function(req, res){
       // req.session.pwd = req.body.pwd;
       req.session.User = doc;
       // res.send(doc);
-      res.redirect('/');
+      if(doc.privilege==='admin'){
+        res.redirect('/admin');
+      }else{
+        res.redirect('/');
+      }
     }
   });
 });
@@ -68,21 +83,41 @@ app.get('/profile', (req, res)=>{
   console.log("Hi. After render");
 });
 
+app.get('/profile/:name', (req, res)=>{
+  var name=req.body.name;
+  User.findOne({name}).then((doc)=>{
+    res.render(path.join(__dirname, '/views/logged.hbs'), {username: doc.name});
+  });
+});
+
 app.post('/login', (req, res)=>{
   var user = req.body.username;
-  var pwd = req.body.password;
-  User.findOne({user, pwd}).then((doc)=>{
+  // var pwd = bcrypt.compareSync(req.body.password, );
+  // console.log(pwd);
+  User.findOne({user}).then((doc)=>{
     if(doc){
-      console.log("Success login");
-      req.session.User = doc;
-      // req.session.doc = doc;
-      // console.log(req.session.doc);
-      // res.set('text/plain').send("Success Login");
-      res.redirect('/');
-      // console.log(user);
-      // console.log(pwd);
-      // res.send(doc);
-      // res.redirect('/logged');
+      if(bcrypt.compareSync(req.body.password, doc.pwd))
+      {
+        console.log("Success login");
+        req.session.User = doc;
+        if(doc.privilege==='admin')
+        {
+          res.redirect('/admin');
+        }
+        // req.session.doc = doc;
+        // console.log(req.session.doc);
+        // res.set('text/plain').send("Success Login");
+        res.redirect('/');
+        // console.log(user);
+        // console.log(pwd);
+        // res.send(doc);
+        // res.redirect('/logged');
+      }else {
+        console.log('Error!! User not found');
+        res.render(path.join(__dirname, '/views/error.hbs'), {
+          error: 'Please enter correct username and/or password'
+        });
+      }
     }else{
       console.log('Error!! User not found');
       res.render(path.join(__dirname, '/views/error.hbs'), {
@@ -98,7 +133,7 @@ app.get('/login', (req, res)=>{
   res.sendFile(path.join(__dirname, '/views/login.html'))
 });
 
-app.post('/courses', (req, res)=>{
+app.post('/admin/create/course', (req, res)=>{
   if(!req.session.User || req.session.User.privilege==='guest'
     || req.session.User.privilege==='user'){
       res.render(path.join(__dirname, '/views/error.hbs'), {
@@ -116,10 +151,15 @@ app.post('/courses', (req, res)=>{
         text,
         regid,
       });
+      console.log(regid);
       course.save().then((doc)=>{
-        res.send(doc);
+        console.log(doc);
+        res.redirect('/admin')
       }, (err)=>{
-        res.status(400).send(err);
+        res.render(path.join(__dirname, '/views/error.hbs'), {
+          error: 'Course regid not unique',
+        });
+        // res.status(400).send(err);
       });
     }
 });
@@ -156,7 +196,7 @@ app.get('/courses/:id', (req, res)=>{
   });
 });
 
-app.get('/addcourse', (req, res)=>{
+app.get('/admin/create/course', (req, res)=>{
   if(!req.session.User || req.session.User.privilege!=='admin'){
       res.render(path.join(__dirname, '/views/error.hbs'), {
         error: "Need to admin access to add courses",
@@ -233,6 +273,7 @@ app.get('/admin', (req, res)=>{
       Course.find().then((doc2)=>{
         course = doc2;
         res.render(path.join(__dirname, '/views/admin.hbs'), {
+          name: req.session.User.user,
           users: user,
           courses: course,
         });
@@ -247,6 +288,34 @@ app.get('/admin', (req, res)=>{
       error: 'Need admin access to view page'
     })
   }
+});
+
+app.post('/admin/create/admin', (req, res)=>{
+  if(req.session.User.privilege==='admin')
+  {
+    var user = req.body.user;
+    var pwd = req.body.pwd;
+    var body = {
+      user: req.body.username,
+      pwd: req.body.password,
+      privilege: 'admin',
+    };
+    User.create(body, function(err, doc){
+      if(err){
+        // console.log(err);
+        res.render(path.join(__dirname, '/views/error.hbs'), {
+          error: 'The username already exists. Pease pick a new one',
+        });
+        // return res.status(400).send(err);
+      }else{
+        res.redirect('/admin');
+      }
+    });
+  }
+});
+
+app.get('/admin/create/admin', (req, res)=>{
+  res.redirect('/register');
 });
 
 app.get('/logout', (req, res)=>{
