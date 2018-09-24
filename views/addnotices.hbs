@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <h1>Adding Notices</h1>
+</head>
+<body>
+  <h3>Welcome ADMIN!!</h3>
+  <form id = "notice-form" name="select" action="/admin/create/notice" method="POST">
+    <select id="course" name="course">
+      <!-- <option value="test">Test</option> -->
+      {{#each courses}}
+      <option value="{{this.name}}">{{this.name}}</option>
+      {{/each}}
+    </select>
+    <br>
+    <input id="text" type = "text" placeholder="desc" style="height:200px" name="text"></input>
+    <br>
+    <button id="submit">Submit</button>
+  </form>
+  <br>
+  <b id = "error"></b>
+  <b><a href="/" id="homeLink"></a> <a href="/addcourse" id="addcourse"></a></b>
+</body>
+</html>

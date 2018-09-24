@@ -23,6 +23,10 @@ var CourseSchema = mongoose.Schema({
     trim: true,
     default: 'No desc provided',
   },
+  notices: {
+    type: [{type: String}],
+    default: [],
+  }
   // regid: {
   //   type: String,
   //   trim: true,

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <h1>Remove notices</h1>
+</head>
+<body>
+{{#each course as |course|}}
+<b>{{this.name}}</b>
+{{#each this.notices as |notice|}}
+<form action="/admin/remove/notice/{{course.name}}/{{notice}}" method="post">
+<hr>
+{{this}}
+<br>
+<br>
+<button>Remove</button>
+<hr>
+{{/each}}
+</form>
+<br>
+<br>
+{{/each}}
+</body>
+</html>

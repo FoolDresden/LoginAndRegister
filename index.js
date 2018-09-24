@@ -104,10 +104,13 @@ app.post('/login', (req, res)=>{
         {
           res.redirect('/admin');
         }
+        else {
+          res.redirect('/');
+        }
         // req.session.doc = doc;
         // console.log(req.session.doc);
         // res.set('text/plain').send("Success Login");
-        res.redirect('/');
+        // res.redirect('/');
         // console.log(user);
         // console.log(pwd);
         // res.send(doc);
@@ -326,6 +329,97 @@ app.get('/logout', (req, res)=>{
     pwd: 'password',
   };
   res.redirect('/');
+});
+
+app.get('/admin/create/notice', (req, res)=>{
+  if(req.session.User.privilege==='admin')
+  {
+    Course.find().then((doc)=>{
+      // console.log(doc);
+      res.render(path.join(__dirname, '/views/addnotices.hbs'), {
+        courses: doc,
+      });
+    });
+  }else{
+    res.render(path.join(__dirname, '/views/error.hbs'), {
+      error: 'Need admin access',
+    });
+  }
+});
+
+app.get('/notices/:name', (req, res)=>{
+  Course.findOne({name: req.params.name}).then((doc)=>{
+    res.render(path.join(__dirname, '/views/notices.hbs'), {
+      name: doc.name,
+      notices: doc.notices,
+    });
+  });
+});
+
+app.post('/admin/create/notice', (req, res)=>{
+  if(req.session.User.privilege==='admin')
+  {
+    console.log(req.body.course);
+    Course.findOne({name: req.body.course}).then((doc)=>{
+      // if(doc)
+      doc.notices.push(req.body.text);
+      doc.save();
+      res.redirect('/admin');
+      // console.log(doc);
+    }, (err)=>{
+      res.status(400).send(err);
+    });
+  }
+  else {
+    res.render(path.join(__dirname, '/views/error.hbs'), {
+      error: 'Need admin access',
+    });
+  }
+});
+
+app.get('/admin/remove/notice', (req, res)=>{
+  if(req.session.User.privilege==='admin')
+  {
+    Course.find().then((doc)=>{
+       res.render(path.join(__dirname, '/views/removeNotice.hbs'), {
+         course: doc,
+       })
+    });
+  }else {
+    res.render(path.join(__dirname, '/views/error.hbs'), {
+      error: 'Need admin access',
+    });
+  }
+});
+
+app.post('/admin/remove/notice/:name/:notice', (req, res)=>{
+  if(req.session.User.privilege==='admin')
+  {
+    console.log("Came to remove");
+    var course = req.params.name;
+    var notice = req.params.notice;
+    // console.log(req.params);
+    console.log(course);
+    console.log(notice);
+    // console.log(course.name);
+    Course.findOne({name: course}).then((doc)=>{
+      doc.notices.splice(doc.notices.indexOf(notice), 1);
+      doc.save();
+    });
+    res.redirect('/admin/remove/notice');
+    // Course.find().then((doc)=>{
+    //   for(var i=0;i<doc.length;i=i+1)
+    //   {
+    //     if(doc.notices.indexOf(notice)!==-1)
+    //     {
+    //       doc.notices.splice(doc.notices.indexOf(notice, 1));
+    //       doc.save();
+    //       break;
+    //     }
+    //   }
+    // });
+    // res.redirect('/admin/remove/notice');
+  }
 });
 
 app.listen(3000, ()=>{
